@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Group G decider — Iran World Cup 2026 scenario calculator</title>
+<style>
+  :root {
+    --bg: #F5F2EA;
+    --pitch-900: #0E2A20;
+    --pitch-600: #1F4B3A;
+    --amber: #E0922A;
+    --crimson: #B83A32;
+    --ink: #182019;
+    --muted: #6E7468;
+    --card: #FFFFFF;
+    --border: rgba(24,32,25,0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.5;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+
+  header {
+    background: var(--pitch-900);
+    color: #F2EFE6;
+    padding: 2.5rem 1.5rem 2.25rem;
+  }
+
+  .eyebrow {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin: 0 0 0.75rem;
+  }
+
+  header h1 {
+    font-size: clamp(24px, 4vw, 32px);
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    max-width: 640px;
+    line-height: 1.25;
+  }
+
+  header p {
+    font-size: 14px;
+    color: rgba(242,239,230,0.7);
+    margin: 0;
+    max-width: 560px;
+  }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+  }
+
+  .matches {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .match-card {
+    background: var(--pitch-900);
+    border-radius: 10px;
+    padding: 14px 18px;
+    display: grid;
+    grid-template-columns: 60px 1fr auto auto auto 1fr;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .match-date {
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(224,146,42,0.85);
+  }
+
+  .team-name {
+    font-size: 14px;
+    color: #F2EFE6;
+    font-weight: 500;
+  }
+
+  .team-name.right { text-align: right; }
+
+  .score-input {
+    width: 48px;
+    height: 44px;
+    background: #06160F;
+    border: 1px solid rgba(224,146,42,0.35);
+    border-radius: 6px;
+    color: var(--amber);
+    font-family: 'Courier New', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    -moz-appearance: textfield;
+  }
+
+  .score-input::-webkit-outer-spin-button,
+  .score-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .score-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--amber);
+  }
+
+  .dash {
+    color: rgba(242,239,230,0.4);
+    font-family: 'Courier New', monospace;
+  }
+
+  #verdict {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+  }
+
+  #verdict svg { flex-shrink: 0; }
+
+  #verdict-text {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  #verdict-reason {
+    font-size: 13px;
+    margin: 2px 0 0;
+    opacity: 0.85;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-top: 1.5rem;
+    font-size: 13px;
+  }
+
+  thead tr {
+    background: var(--pitch-600);
+  }
+
+  th {
+    color: #F2EFE6;
+    font-weight: 500;
+    text-align: center;
+    padding: 10px 6px;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  th:first-child { text-align: left; padding-left: 14px; }
+
+  td {
+    padding: 10px 6px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+
+  td:first-child { text-align: left; padding-left: 14px; }
+
+  tr.iran-row td {
+    font-weight: 600;
+    border-left: 3px solid var(--amber);
+    border-radius: 0;
+  }
+
+  tr.iran-row td:first-child { padding-left: 11px; }
+
+  .controls-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.25rem;
+  }
+
+  .key-match {
+    margin-top: 1.75rem;
+    background: var(--pitch-900);
+    border-radius: 12px;
+    padding: 18px 20px;
+    border-left: 3px solid var(--crimson);
+  }
+
+  .key-match-label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--crimson);
+    margin: 0 0 8px;
+  }
+
+  .key-match-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #F2EFE6;
+    margin: 0 0 6px;
+  }
+
+  .key-match-body {
+    font-size: 13px;
+    color: rgba(242,239,230,0.75);
+    margin: 0;
+  }
+
+  .key-match-body + .key-match-body {
+    margin-top: 8px;
+  }
+
+  .bracket {
+    margin-top: 1.75rem;
+  }
+
+  .bracket-label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 6px;
+  }
+
+  .bracket-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 0 0 1.1rem;
+  }
+
+  .bracket-stages {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .stage-node {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 9px 0;
+    position: relative;
+  }
+
+  .stage-node:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: -9px;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .stage-count {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--pitch-900);
+    color: var(--amber);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    z-index: 1;
+  }
+
+  .stage-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin: 8px 0 0;
+  }
+
+  .stage-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin: 2px 0 0;
+  }
+
+  .path-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 0.5rem;
+  }
+
+  .path-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+  }
+
+  .path-tag {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--pitch-600);
+    margin: 0 0 2px;
+  }
+
+  .path-body {
+    font-size: 12.5px;
+    color: var(--ink);
+    margin: 0;
+  }
+
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 0.75rem;
+  }
+
+  @media (min-width: 560px) {
+    .groups-grid { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  .group-card {
+    background: var(--pitch-900);
+    border-radius: 8px;
+    padding: 10px 12px;
+    border: 1.5px solid transparent;
+  }
+
+  .group-card.highlight {
+    border-color: var(--amber);
+  }
+
+  .group-card-letter {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.06em;
+    margin: 0 0 4px;
+  }
+
+  .group-card-teams {
+    font-size: 12px;
+    color: #F2EFE6;
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  .r32-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 0.75rem;
+  }
+
+  .r32-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 4px 10px;
+  }
+
+  .r32-card.highlight {
+    border-color: var(--amber);
+    background: rgba(224,146,42,0.07);
+  }
+
+  .r32-match {
+    font-size: 12.5px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .r32-venue {
+    font-size: 10.5px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  button#reset {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  button#reset:hover { background: rgba(24,32,25,0.05); }
+
+  button#reset:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--pitch-600);
+  }
+
+  footer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.5rem 2.5rem;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 480px) {
+    .match-card {
+      grid-template-columns: 1fr auto auto auto 1fr;
+    }
+    .match-date { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Group G &middot; final round</p>
+  <h1>Three results decide whether Iran make the round of 32</h1>
+  <p>Belgium 1&ndash;1 Egypt, Iran 2&ndash;2 New Zealand, and Belgium 0&ndash;0 Iran are locked in. Set the scorelines below for what's left and watch the table update.</p>
+</header>
+
+<main>
+
+  <div class="matches">
+
+    <div class="match-card">
+      <span class="match-date">Today</span>
+      <span class="team-name">New Zealand</span>
+      <input type="number" min="0" max="9" value="1" id="nz-eg-h" class="score-input" aria-label="New Zealand goals vs Egypt">
+      <span class="dash">&ndash;</span>
+      <input type="number" min="0" max="9" value="2" id="nz-eg-a" class="score-input" aria-label="Egypt goals vs New Zealand">
+      <span class="team-name right">Egypt</span>
+    </div>
+
+    <div class="match-card">
+      <span class="match-date">Jun 26</span>
+      <span class="team-name">Egypt</span>
+      <input type="number" min="0" max="9" value="0" id="eg-ir-h" class="score-input" aria-label="Egypt goals vs Iran">
+      <span class="dash">&ndash;</span>
+      <input type="number" min="0" max="9" value="1" id="eg-ir-a" class="score-input" aria-label="Iran goals vs Egypt">
+      <span class="team-name right">Iran</span>
+    </div>
+
+    <div class="match-card">
+      <span class="match-date">Jun 26</span>
+      <span class="team-name">New Zealand</span>
+      <input type="number" min="0" max="9" value="0" id="nz-bel-h" class="score-input" aria-label="New Zealand goals vs Belgium">
+      <span class="dash">&ndash;</span>
+      <input type="number" min="0" max="9" value="1" id="nz-bel-a" class="score-input" aria-label="Belgium goals vs New Zealand">
+      <span class="team-name right">Belgium</span>
+    </div>
+
+  </div>
+
+  <div id="verdict">
+    <svg id="verdict-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+    <div>
+      <p id="verdict-text"></p>
+      <p id="verdict-reason"></p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Team</th>
+        <th>P</th>
+        <th>W</th>
+        <th>D</th>
+        <th>L</th>
+        <th>GF</th>
+        <th>GA</th>
+        <th>GD</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody id="standings-body"></tbody>
+  </table>
+
+  <div class="controls-row">
+    <span style="font-size:12px; color:var(--muted);">Ties beyond goal difference and goals scored fall back to head-to-head for straight two-team ties.</span>
+    <button id="reset">Reset to cleanest path</button>
+  </div>
+
+  <div class="key-match">
+    <p class="key-match-label">The match that decides everything</p>
+    <p class="key-match-title">Egypt vs Iran, June 26 — Seattle</p>
+    <p class="key-match-body">This is the only fixture Iran controls directly, and it caps their ceiling. A loss locks Iran on 2 points for the tournament — mathematically out of 1st place no matter what happens in New Zealand vs Belgium, since Egypt would already be sitting on 4+ points from the win alone.</p>
+    <p class="key-match-body">A draw keeps Iran alive for 2nd or a third-place slot, but only a win opens the door to topping the group, and even then it likely comes down to goal difference or goals scored against Belgium.</p>
+  </div>
+
+  <div class="bracket">
+    <p class="bracket-label">Tournament structure</p>
+    <p class="bracket-title">How Group G connects to the knockout rounds</p>
+
+    <p class="bracket-label" style="margin-top:1.25rem;">All 12 groups &rarr; Round of 32</p>
+    <div style="margin-top:0.6rem;">
+      <svg viewBox="0 0 380 1100" width="100%" height="auto" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
+        <text x="190" y="20" text-anchor="middle" font-family="'Courier New', monospace" font-size="13" font-weight="700" fill="#B83A32" letter-spacing="0.05em">2026 WORLD CUP</text>
+        <text x="190" y="34" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9.5" fill="#6E7468">12 groups, 48 teams &mdash; top 2 from each advance</text>
+
+        <rect x="15" y="40" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="56" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP A</text>
+        <text x="27" y="74" font-size="11.5" fill="#182019">Mexico &middot; South Africa</text>
+        <text x="27" y="92" font-size="11.5" fill="#182019">Korea Republic &middot; Czechia</text>
+        <line x1="335" y1="75" x2="350" y2="75" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="122" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="138" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP B</text>
+        <text x="27" y="156" font-size="11.5" fill="#182019">Canada &middot; Bosnia &amp; Herz.</text>
+        <text x="27" y="174" font-size="11.5" fill="#182019">Qatar &middot; Switzerland</text>
+        <line x1="335" y1="157" x2="350" y2="157" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="204" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="220" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP C</text>
+        <text x="27" y="238" font-size="11.5" fill="#182019">Brazil &middot; Morocco</text>
+        <text x="27" y="256" font-size="11.5" fill="#182019">Haiti &middot; Scotland</text>
+        <line x1="335" y1="239" x2="350" y2="239" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="286" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="302" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP D</text>
+        <text x="27" y="320" font-size="11.5" fill="#182019">United States &middot; Paraguay</text>
+        <text x="27" y="338" font-size="11.5" fill="#182019">Australia &middot; T&uuml;rkiye</text>
+        <line x1="335" y1="321" x2="350" y2="321" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="368" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="384" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP E</text>
+        <text x="27" y="402" font-size="11.5" fill="#182019">Germany &middot; Cura&ccedil;ao</text>
+        <text x="27" y="420" font-size="11.5" fill="#182019">Ivory Coast &middot; Ecuador</text>
+        <line x1="335" y1="403" x2="350" y2="403" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="450" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="466" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP F</text>
+        <text x="27" y="484" font-size="11.5" fill="#182019">Netherlands &middot; Japan</text>
+        <text x="27" y="502" font-size="11.5" fill="#182019">Sweden &middot; Tunisia</text>
+        <line x1="335" y1="485" x2="350" y2="485" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="532" width="320" height="70" rx="8" fill="#FFFBF2" stroke="#E0922A" stroke-width="2.2"/>
+        <text x="27" y="548" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#E0922A" letter-spacing="0.05em">GROUP G</text>
+        <text x="27" y="566" font-size="11.5" font-weight="600" fill="#182019">Belgium &middot; Egypt</text>
+        <text x="27" y="584" font-size="11.5" font-weight="600" fill="#182019">Iran &middot; New Zealand</text>
+        <line x1="335" y1="567" x2="350" y2="567" stroke="#E0922A" stroke-width="2.2"/>
+
+        <rect x="15" y="614" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="630" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP H</text>
+        <text x="27" y="648" font-size="11.5" fill="#182019">Spain &middot; Cape Verde</text>
+        <text x="27" y="666" font-size="11.5" fill="#182019">Saudi Arabia &middot; Uruguay</text>
+        <line x1="335" y1="649" x2="350" y2="649" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="696" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="712" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP I</text>
+        <text x="27" y="730" font-size="11.5" fill="#182019">France &middot; Senegal</text>
+        <text x="27" y="748" font-size="11.5" fill="#182019">Iraq &middot; Norway</text>
+        <line x1="335" y1="731" x2="350" y2="731" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="778" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="794" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP J</text>
+        <text x="27" y="812" font-size="11.5" fill="#182019">Argentina &middot; Algeria</text>
+        <text x="27" y="830" font-size="11.5" fill="#182019">Austria &middot; Jordan</text>
+        <line x1="335" y1="813" x2="350" y2="813" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="860" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="876" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP K</text>
+        <text x="27" y="894" font-size="11.5" fill="#182019">Portugal &middot; DR Congo</text>
+        <text x="27" y="912" font-size="11.5" fill="#182019">Uzbekistan &middot; Colombia</text>
+        <line x1="335" y1="895" x2="350" y2="895" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <rect x="15" y="942" width="320" height="70" rx="8" fill="#FFFFFF" stroke="#1F4B3A" stroke-width="1.3"/>
+        <text x="27" y="958" font-family="'Courier New', monospace" font-size="11" font-weight="700" fill="#1F4B3A" letter-spacing="0.05em">GROUP L</text>
+        <text x="27" y="976" font-size="11.5" fill="#182019">England &middot; Croatia</text>
+        <text x="27" y="994" font-size="11.5" fill="#182019">Ghana &middot; Panama</text>
+        <line x1="335" y1="977" x2="350" y2="977" stroke="#1F4B3A" stroke-width="1.3"/>
+
+        <line x1="350" y1="75" x2="350" y2="977" stroke="#1F4B3A" stroke-width="1.1" stroke-opacity="0.35"/>
+        <line x1="350" y1="977" x2="350" y2="1032" stroke="#1F4B3A" stroke-width="1.1" stroke-opacity="0.35"/>
+        <line x1="350" y1="1032" x2="190" y2="1032" stroke="#1F4B3A" stroke-width="1.1" stroke-opacity="0.35"/>
+
+        <rect x="110" y="1032" width="160" height="44" rx="22" fill="#0E2A20"/>
+        <text x="190" y="1050" text-anchor="middle" font-family="'Courier New', monospace" font-size="12" font-weight="700" fill="#E0922A">ROUND OF 32</text>
+        <text x="190" y="1066" text-anchor="middle" font-family="-apple-system, sans-serif" font-size="9.5" fill="#F2EFE6">24 group qualifiers + 8 best 3rd</text>
+      </svg>
+    </div>
+    <p style="font-size:11px; color:var(--muted); margin:0.5rem 0 0;">Group G is highlighted in amber. Exact lines for the 8 third-place wildcard slots can't be drawn yet &mdash; see the confirmed Round of 32 draw below.</p>
+
+    <div class="bracket-stages">
+      <div class="stage-node">
+        <span class="stage-count">48</span>
+        <div>
+          <p class="stage-name">Group stage</p>
+          <p class="stage-desc">12 groups of 4 &mdash; Group G: Belgium, Egypt, Iran, New Zealand</p>
+        </div>
+      </div>
+      <div class="stage-node">
+        <span class="stage-count">32</span>
+        <div>
+          <p class="stage-name">Round of 32</p>
+          <p class="stage-desc">Top 2 from every group, plus the 8 best third-place finishers</p>
+        </div>
+      </div>
+      <div class="stage-node">
+        <span class="stage-count">16</span>
+        <div>
+          <p class="stage-name">Round of 16</p>
+        </div>
+      </div>
+      <div class="stage-node">
+        <span class="stage-count">8</span>
+        <div>
+          <p class="stage-name">Quarterfinals</p>
+        </div>
+      </div>
+      <div class="stage-node">
+        <span class="stage-count">4</span>
+        <div>
+          <p class="stage-name">Semifinals</p>
+        </div>
+      </div>
+      <div class="stage-node">
+        <span class="stage-count">2</span>
+        <div>
+          <p class="stage-name">Final</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="bracket-label" style="margin-top:1.5rem;">Full Round of 32 draw &mdash; 16 matches, 32 teams, Jun 28 &ndash; Jul 3</p>
+    <div class="r32-grid">
+      <div class="r32-card"><span class="r32-match">A 2nd &ndash; B 2nd</span><span class="r32-venue">Jun 28 &middot; SoFi Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">C 1st &ndash; F 2nd</span><span class="r32-venue">Jun 29 &middot; NRG Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">E 1st &ndash; 3rd (A/B/C/D/F)</span><span class="r32-venue">Jun 29 &middot; Gillette Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">F 1st &ndash; C 2nd</span><span class="r32-venue">Jun 29 &middot; Estadio BBVA</span></div>
+      <div class="r32-card"><span class="r32-match">E 2nd &ndash; I 2nd</span><span class="r32-venue">Jun 30 &middot; AT&amp;T Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">I 1st &ndash; 3rd (C/D/F/G/H)</span><span class="r32-venue">Jun 30 &middot; MetLife Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">A 1st &ndash; 3rd (C/E/F/H/I)</span><span class="r32-venue">Jun 30 &middot; Estadio Azteca</span></div>
+      <div class="r32-card"><span class="r32-match">L 1st &ndash; 3rd (E/H/I/J/K)</span><span class="r32-venue">Jul 1 &middot; Mercedes-Benz Stadium</span></div>
+      <div class="r32-card highlight"><span class="r32-match">G 1st &ndash; 3rd (A/E/H/I/J)</span><span class="r32-venue">Jul 1 &middot; Lumen Field</span></div>
+      <div class="r32-card"><span class="r32-match">D 1st &ndash; 3rd (B/E/F/I/J)</span><span class="r32-venue">Jul 1 &middot; Levi's Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">H 1st &ndash; J 2nd</span><span class="r32-venue">Jul 2 &middot; SoFi Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">K 2nd &ndash; L 2nd</span><span class="r32-venue">Jul 2 &middot; BMO Field</span></div>
+      <div class="r32-card"><span class="r32-match">B 1st &ndash; 3rd (E/F/G/I/J)</span><span class="r32-venue">Jul 2 &middot; BC Place</span></div>
+      <div class="r32-card highlight"><span class="r32-match">D 2nd &ndash; G 2nd</span><span class="r32-venue">Jul 3 &middot; AT&amp;T Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">J 1st &ndash; H 2nd</span><span class="r32-venue">Jul 3 &middot; Hard Rock Stadium</span></div>
+      <div class="r32-card"><span class="r32-match">K 1st &ndash; 3rd (D/E/I/J/L)</span><span class="r32-venue">Jul 3 &middot; Arrowhead Stadium</span></div>
+    </div>
+
+    <p class="bracket-label" style="margin-top:1.5rem;">Iran's Round of 32 opponent depends on group finish</p>
+    <div class="path-grid">
+      <div class="path-card">
+        <p class="path-tag">1st in Group G</p>
+        <p class="path-body">Faces the third-place team from Group A, E, H, I, or J</p>
+      </div>
+      <div class="path-card">
+        <p class="path-tag">2nd in Group G</p>
+        <p class="path-body">Faces the runner-up of Group D</p>
+      </div>
+      <div class="path-card">
+        <p class="path-tag">3rd in Group G</p>
+        <p class="path-body">Only advances if among the 8 best third-place teams across all groups &mdash; opponent and route vary</p>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Group G concludes June 26 with Egypt vs Iran in Seattle and New Zealand vs Belgium in Vancouver, kicking off simultaneously.
+</footer>
+
+<script>
+  const fixed = [
+    {home:'Belgium', away:'Egypt', hg:1, ag:1},
+    {home:'Iran', away:'New Zealand', hg:2, ag:2},
+    {home:'Belgium', away:'Iran', hg:0, ag:0}
+  ];
+
+  const DEFAULTS = {
+    'nz-eg-h':1, 'nz-eg-a':2,
+    'eg-ir-h':0, 'eg-ir-a':1,
+    'nz-bel-h':0, 'nz-bel-a':1
+  };
+
+  const ICONS = {
+    trophy: '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4ZM7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3" />',
+    check: '<path d="M9 12l2 2 4-4M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />',
+    alert: '<path d="M12 9v4M12 17h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.4 0Z" />',
+    x: '<path d="M15 9l-6 6M9 9l6 6M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />'
+  };
+
+  function getVal(id){
+    const v = parseInt(document.getElementById(id).value);
+    return isNaN(v) ? 0 : Math.max(0, Math.min(9, v));
+  }
+
+  function fmtGD(n){ return n > 0 ? '+' + n : String(n); }
+
+  function compute(){
+    const matches = fixed.concat([
+      {home:'New Zealand', away:'Egypt', hg:getVal('nz-eg-h'), ag:getVal('nz-eg-a')},
+      {home:'Egypt', away:'Iran', hg:getVal('eg-ir-h'), ag:getVal('eg-ir-a')},
+      {home:'New Zealand', away:'Belgium', hg:getVal('nz-bel-h'), ag:getVal('nz-bel-a')}
+    ]);
+
+    const teams = ['Iran','Belgium','Egypt','New Zealand'];
+    const stats = {};
+    teams.forEach(t => stats[t] = {P:0,W:0,D:0,L:0,GF:0,GA:0});
+
+    matches.forEach(m => {
+      const h = stats[m.home], a = stats[m.away];
+      h.P++; a.P++;
+      h.GF += m.hg; h.GA += m.ag;
+      a.GF += m.ag; a.GA += m.hg;
+      if(m.hg > m.ag){ h.W++; a.L++; }
+      else if(m.hg < m.ag){ a.W++; h.L++; }
+      else { h.D++; a.D++; }
+    });
+
+    const rows = teams.map(t => {
+      const s = stats[t];
+      return {team:t, ...s, GD:s.GF-s.GA, Pts:s.W*3+s.D};
+    });
+
+    rows.sort((a,b) => {
+      if(b.Pts !== a.Pts) return b.Pts - a.Pts;
+      if(b.GD !== a.GD) return b.GD - a.GD;
+      if(b.GF !== a.GF) return b.GF - a.GF;
+      const h2h = matches.find(m => (m.home===a.team && m.away===b.team) || (m.home===b.team && m.away===a.team));
+      if(h2h){
+        const aGF = h2h.home===a.team ? h2h.hg : h2h.ag;
+        const bGF = h2h.home===b.team ? h2h.hg : h2h.ag;
+        if(bGF !== aGF) return bGF - aGF;
+      }
+      return a.team.localeCompare(b.team);
+    });
+
+    return {rows, matches};
+  }
+
+  function reasonBetween(a, b, matches){
+    if(a.Pts !== b.Pts) return a.Pts + ' points to ' + b.Pts;
+    if(a.GD !== b.GD) return 'goal difference, ' + fmtGD(a.GD) + ' vs ' + fmtGD(b.GD);
+    if(a.GF !== b.GF) return 'goals scored, ' + a.GF + ' vs ' + b.GF;
+    return 'head-to-head';
+  }
+
+  function render(){
+    const {rows, matches} = compute();
+    const tbody = document.getElementById('standings-body');
+    tbody.innerHTML = '';
+
+    rows.forEach((r, i) => {
+      const isIran = r.team === 'Iran';
+      const tr = document.createElement('tr');
+      if(isIran) tr.className = 'iran-row';
+      tr.innerHTML =
+        '<td>' + (i+1) + '. ' + r.team + '</td>' +
+        '<td>' + r.P + '</td>' +
+        '<td>' + r.W + '</td>' +
+        '<td>' + r.D + '</td>' +
+        '<td>' + r.L + '</td>' +
+        '<td>' + r.GF + '</td>' +
+        '<td>' + r.GA + '</td>' +
+        '<td>' + fmtGD(r.GD) + '</td>' +
+        '<td>' + r.Pts + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    const iranIdx = rows.findIndex(r => r.team === 'Iran');
+    const iranPos = iranIdx + 1;
+
+    const verdict = document.getElementById('verdict');
+    const verdictText = document.getElementById('verdict-text');
+    const verdictReason = document.getElementById('verdict-reason');
+    const verdictIcon = document.getElementById('verdict-icon');
+
+    let text = '', icon = '', bg = '', fg = '';
+
+    if(iranPos === 1){
+      text = 'Iran win Group G'; icon = ICONS.trophy;
+      bg = 'rgba(31,75,58,0.1)'; fg = 'var(--pitch-600)';
+    } else if(iranPos === 2){
+      text = 'Iran qualify for the round of 32, 2nd place'; icon = ICONS.check;
+      bg = 'rgba(224,146,42,0.12)'; fg = '#9C5F12';
+    } else if(iranPos === 3){
+      text = 'Iran finish 3rd, only through as one of the 8 best third-place teams'; icon = ICONS.alert;
+      bg = 'rgba(224,146,42,0.18)'; fg = '#9C5F12';
+    } else {
+      text = 'Iran finish bottom of Group G, eliminated'; icon = ICONS.x;
+      bg = 'rgba(184,58,50,0.1)'; fg = 'var(--crimson)';
+    }
+
+    verdict.style.background = bg;
+    verdict.style.color = fg;
+    verdictIcon.innerHTML = icon;
+    verdictText.textContent = text;
+
+    const reasonParts = [];
+    if(iranIdx > 0) reasonParts.push('behind ' + rows[iranIdx-1].team + ' on ' + reasonBetween(rows[iranIdx-1], rows[iranIdx], matches));
+    if(iranIdx < rows.length - 1) reasonParts.push('ahead of ' + rows[iranIdx+1].team + ' on ' + reasonBetween(rows[iranIdx], rows[iranIdx+1], matches));
+    verdictReason.textContent = reasonParts.join(', ');
+  }
+
+  document.querySelectorAll('.score-input').forEach(inp => inp.addEventListener('input', render));
+
+  document.getElementById('reset').addEventListener('click', () => {
+    Object.keys(DEFAULTS).forEach(id => document.getElementById(id).value = DEFAULTS[id]);
+    render();
+  });
+
+  render();
+</script>
+
+</body>
+</html>
